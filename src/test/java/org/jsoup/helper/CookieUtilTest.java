@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CookieUtilTest {
 
-    @Test void parseCookie() {
+    @Test
+    void parseCookie() {
         HttpConnection.Response res = new HttpConnection.Response();
 
         CookieUtil.parseCookie("foo=bar qux; Domain=.example.com; Path=/; Secure", res);
@@ -22,3 +23,5 @@ class CookieUtilTest {
         assertEquals(".example.com", res.cookies.get("; Domain")); // no actual cookie name or val
     }
 }
+
+// test comment

@@ -20,6 +20,7 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  
   <scm>
     <url>https://github.com/jhy/jsoup</url>
     <connection>scm:git:https://github.com/jhy/jsoup.git</connection>
