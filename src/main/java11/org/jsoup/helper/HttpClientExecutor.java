@@ -24,12 +24,15 @@ import static org.jsoup.helper.HttpConnection.Response;
 import static org.jsoup.helper.HttpConnection.Response.writePost;
 
 /**
- Executes requests using the HttpClient, for http/2 support. Enabled by default when available. To disable, set
- property {@code jsoup.useHttpClient} to {@code false}.
+ * Executes requests using the HttpClient, for http/2 support. Enabled by
+ * default when available. To disable, set
+ * property {@code jsoup.useHttpClient} to {@code false}.
  */
-class HttpClientExecutor extends RequestExecutor {
-    // HttpClient expects proxy settings per client; we do per request, so held as a thread local. Can't do same for
-    // auth because that callback is on a worker thread, so can only do auth per Connection. So we create a new client
+public class HttpClientExecutor extends RequestExecutor {
+    // HttpClient expects proxy settings per client; we do per request, so held as a
+    // thread local. Can't do same for
+    // auth because that callback is on a worker thread, so can only do auth per
+    // Connection. So we create a new client
     // if the authenticator is different between requests
     static ThreadLocal<@Nullable Proxy> perRequestProxy = new ThreadLocal<>();
 
@@ -41,11 +44,14 @@ class HttpClientExecutor extends RequestExecutor {
     }
 
     /**
-     Retrieve the HttpClient from the Connection, or create a new one. Allows for connection pooling of requests in the
-     same Connection (session).
+     * Retrieve the HttpClient from the Connection, or create a new one. Allows for
+     * connection pooling of requests in the
+     * same Connection (session).
      */
     HttpClient client() {
-        // we try to reuse the same Client across requests in a given Connection; but if the request's auth or ssl context have changed, we need to create a new client
+        // we try to reuse the same Client across requests in a given Connection; but if
+        // the request's auth or ssl context have changed, we need to create a new
+        // client
         if (req.connection.client != null) {
             HttpClient client = (HttpClient) req.connection.client;
             boolean reuse = true;
@@ -54,16 +60,20 @@ class HttpClientExecutor extends RequestExecutor {
             req.connection.lastAuth = req.authenticator;
             if (prevAuth != req.authenticator) // might both be null
                 reuse = false;
-            if (req.sslContext != null && !(client.sslContext() == req.sslContext)) // client returns default context if not otherwise set
+            if (req.sslContext != null && !(client.sslContext() == req.sslContext)) // client returns default context if
+                                                                                    // not otherwise set
                 reuse = false;
-            if (reuse) return client;
+            if (reuse)
+                return client;
         }
 
         HttpClient.Builder builder = HttpClient.newBuilder();
         builder.followRedirects(HttpClient.Redirect.NEVER); // customized redirects
         builder.proxy(new ProxyWrap()); // thread local impl for per request; called on executing thread
-        if (req.authenticator != null) builder.authenticator(new AuthenticationHandler(req.authenticator));
-        if (req.sslContext    != null) builder.sslContext(req.sslContext);
+        if (req.authenticator != null)
+            builder.authenticator(new AuthenticationHandler(req.authenticator));
+        if (req.sslContext != null)
+            builder.sslContext(req.sslContext);
 
         HttpClient client = builder.build();
         req.connection.client = client;
@@ -73,10 +83,11 @@ class HttpClientExecutor extends RequestExecutor {
     @Override
     HttpConnection.Response execute() throws IOException {
         try {
-            HttpRequest.Builder reqBuilder =
-                HttpRequest.newBuilder(req.url.toURI()).method(req.method.name(), requestBody(req));
-            if (req.timeout() > 0) reqBuilder.timeout(
-                Duration.ofMillis(req.timeout())); // infinite if unset (UrlConnection / jsoup uses 0 for same)
+            HttpRequest.Builder reqBuilder = HttpRequest.newBuilder(req.url.toURI()).method(req.method.name(),
+                    requestBody(req));
+            if (req.timeout() > 0)
+                reqBuilder.timeout(
+                        Duration.ofMillis(req.timeout())); // infinite if unset (UrlConnection / jsoup uses 0 for same)
             CookieUtil.applyCookiesToRequest(req, reqBuilder::header);
 
             // headers:
@@ -84,7 +95,8 @@ class HttpClientExecutor extends RequestExecutor {
                 values.forEach(value -> reqBuilder.header(key, value));
             });
 
-            if (req.proxy() != null) perRequestProxy.set(req.proxy()); // set up per request proxy
+            if (req.proxy() != null)
+                perRequestProxy.set(req.proxy()); // set up per request proxy
             HttpRequest hReq = reqBuilder.build();
             HttpClient client = client();
             hRes = client.send(hReq, HttpResponse.BodyHandlers.ofInputStream());
@@ -119,17 +131,21 @@ class HttpClientExecutor extends RequestExecutor {
     }
 
     /**
-     As HTTP/2 no longer provides a server-set status message, and HttpClient doesn't parse it for 1.1, just provide minimal stock ones, for loggers.
+     * As HTTP/2 no longer provides a server-set status message, and HttpClient
+     * doesn't parse it for 1.1, just provide minimal stock ones, for loggers.
      */
     static String StatusMessage(int statusCode) {
-        if (statusCode < 400) return "OK";
-        if (statusCode == 404) return "Not Found";
+        if (statusCode < 400)
+            return "OK";
+        if (statusCode == 404)
+            return "Not Found";
         return "Error " + statusCode;
     }
 
     @Override
     InputStream responseBody() throws IOException {
-        if (hRes == null) throw new IllegalStateException("Not yet executed");
+        if (hRes == null)
+            throw new IllegalStateException("Not yet executed");
         return hRes.body();
     }
 
@@ -140,7 +156,8 @@ class HttpClientExecutor extends RequestExecutor {
             if (body != null) {
                 try {
                     body.close();
-                } catch (IOException ignored) {}
+                } catch (IOException ignored) {
+                }
             }
             hRes = null;
         }
@@ -176,7 +193,7 @@ class HttpClientExecutor extends RequestExecutor {
         @Override
         public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
             if (perRequestProxy.get() != null) {
-                return;  // no-op
+                return; // no-op
             }
             ProxySelector defaultSelector = ProxySelector.getDefault();
             if (defaultSelector != null && defaultSelector != this) {
