@@ -87,7 +87,8 @@ public class AttributesTest {
         assertFalse(a.hasKey("Hello"));
     }
 
-    @Test public void testIteratorHasNext() {
+    @Test
+    public void testIteratorHasNext() {
         Attributes a = new Attributes();
         a.put("Tot", "1");
         a.put("Hello", "2");
@@ -104,9 +105,9 @@ public class AttributesTest {
     @Test
     public void testIterator() {
         Attributes a = new Attributes();
-        String[][] datas = {{"Tot", "raul"},
-            {"Hello", "pismuth"},
-            {"data-name", "Jsoup"}};
+        String[][] datas = { { "Tot", "raul" },
+                { "Hello", "pismuth" },
+                { "data-name", "Jsoup" } };
         for (String[] atts : datas) {
             a.put(atts[0], atts[1]);
         }
@@ -144,7 +145,8 @@ public class AttributesTest {
         assertEquals(2, seen);
     }
 
-    @Test void iteratorThrows() {
+    @Test
+    void iteratorThrows() {
         Attributes attrs = new Attributes();
         attrs.put("One", "one").put("Two", "two");
 
@@ -178,10 +180,11 @@ public class AttributesTest {
         List<Attribute> attributes = a.asList();
         assertEquals(2, attributes.size());
         assertEquals("One", attributes.get(0).getKey());
-        assertEquals("Two", attributes.get(1). getKey());
+        assertEquals("Two", attributes.get(1).getKey());
     }
 
-    @Test public void htmlSkipsInternals() {
+    @Test
+    public void htmlSkipsInternals() {
         Attributes a = new Attributes();
         a.put("One", "One");
         a.put(Attributes.internalKey("baseUri"), "example.com");
@@ -263,7 +266,7 @@ public class AttributesTest {
     public void testSetKeyConsistency() {
         Attributes a = new Attributes();
         a.put("a", "a");
-        for(Attribute at : a) {
+        for (Attribute at : a) {
             at.setKey("b");
         }
         assertFalse(a.hasKey("a"), "Attribute 'a' not correctly removed");
@@ -286,7 +289,8 @@ public class AttributesTest {
         assertFalse(ats.hasDeclaredValueForKeyIgnoreCase("C"));
     }
 
-    @Test public void testSizeWhenHasInternal() {
+    @Test
+    public void testSizeWhenHasInternal() {
         Attributes a = new Attributes();
         a.put("One", "One");
         a.put("Two", "Two");
@@ -301,15 +305,18 @@ public class AttributesTest {
         assertEquals(2, a.asList().size()); // excluded from lists
     }
 
-    @Test public void testBooleans() {
-        // want unknown=null, and known like async=null, async="", and async=async to collapse
+    @Test
+    public void testBooleans() {
+        // want unknown=null, and known like async=null, async="", and async=async to
+        // collapse
         String html = "<a foo bar=\"\" async=async qux=qux defer=deferring ismap inert=\"\">";
         Element el = Jsoup.parse(html).selectFirst("a");
         assertEquals(" foo bar=\"\" async qux=\"qux\" defer=\"deferring\" ismap inert", el.attributes().html());
 
     }
 
-    @Test public void booleanNullAttributesConsistent() {
+    @Test
+    public void booleanNullAttributesConsistent() {
         Attributes attributes = new Attributes();
         attributes.put("key", null);
         Attribute attribute = attributes.iterator().next();
@@ -318,7 +325,8 @@ public class AttributesTest {
         assertEquals(" key", attributes.html());
     }
 
-    @Test public void booleanEmptyString() {
+    @Test
+    public void booleanEmptyString() {
         Attributes attributes = new Attributes();
         attributes.put("checked", "");
         Attribute attribute = attributes.iterator().next();
@@ -327,7 +335,8 @@ public class AttributesTest {
         assertEquals(" checked", attributes.html());
     }
 
-    @Test public void booleanCaseInsensitive() {
+    @Test
+    public void booleanCaseInsensitive() {
         Attributes attributes = new Attributes();
         attributes.put("checked", "CHECKED");
         Attribute attribute = attributes.iterator().next();
@@ -336,27 +345,28 @@ public class AttributesTest {
         assertEquals(" checked", attributes.html());
     }
 
-    @Test public void equalsIsOrderInsensitive() {
+    @Test
+    public void equalsIsOrderInsensitive() {
         Attributes one = new Attributes()
-            .add("Key1", "Val1")
-            .add("Key2", "Val2")
-            .add("Key3", null);
+                .add("Key1", "Val1")
+                .add("Key2", "Val2")
+                .add("Key3", null);
 
         Attributes two = new Attributes()
-            .add("Key1", "Val1")
-            .add("Key2", "Val2")
-            .add("Key3", null);
+                .add("Key1", "Val1")
+                .add("Key2", "Val2")
+                .add("Key3", null);
 
         Attributes three = new Attributes()
-            .add("Key2", "Val2")
-            .add("Key3", null)
-            .add("Key1", "Val1");
+                .add("Key2", "Val2")
+                .add("Key3", null)
+                .add("Key1", "Val1");
 
         Attributes four = new Attributes()
-            .add("Key1", "Val1")
-            .add("Key2", "Val2")
-            .add("Key3", null)
-            .add("Key4", "Val4");
+                .add("Key1", "Val1")
+                .add("Key2", "Val2")
+                .add("Key3", null)
+                .add("Key4", "Val4");
 
         assertEquals(one, one.clone());
         assertEquals(one, two);
@@ -370,11 +380,12 @@ public class AttributesTest {
         assertNotEquals(one, four);
     }
 
-    @Test void cloneAttributes() {
+    @Test
+    void cloneAttributes() {
         Attributes one = new Attributes()
-            .add("Key1", "Val1")
-            .add("Key2", "Val2")
-            .add("Key3", null);
+                .add("Key1", "Val1")
+                .add("Key2", "Val2")
+                .add("Key3", null);
         Attributes two = one.clone();
         assertEquals(3, two.size());
         assertEquals("Val2", two.get("Key2"));
@@ -386,7 +397,8 @@ public class AttributesTest {
         assertNotEquals(one, two);
     }
 
-    @Test void cloneGetsUniqueUserDataMap() {
+    @Test
+    void cloneGetsUniqueUserDataMap() {
         Attributes one = new Attributes();
         String data = "Hello";
         one.userData("data", data);
@@ -396,7 +408,8 @@ public class AttributesTest {
         assertNotSame(two.userData(), one.userData());
     }
 
-    @Test void dontCloneNullUserData() {
+    @Test
+    void dontCloneNullUserData() {
         // https://github.com/jhy/jsoup/issues/2356
         Element span1 = Jsoup.parse("<span id=1></span>").expectFirst("span");
         Attributes attrs1 = span1.attributes();
@@ -409,7 +422,8 @@ public class AttributesTest {
         assertTrue(attrs2.isEmpty());
     }
 
-    @Test void sizeDoesNotIncludeInternal() {
+    @Test
+    void sizeDoesNotIncludeInternal() {
         Element el = new Element("el");
         Attributes attrs = el.attributes();
         assertEquals(0, attrs.size());
@@ -431,4 +445,5 @@ public class AttributesTest {
         assertEquals(2, attrs.size); // we keep the internals
         assertTrue(attrs.isEmpty());
     }
+
 }

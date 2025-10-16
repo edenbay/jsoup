@@ -15,9 +15,9 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- A single key + value attribute. (Only used for presentation.)
+ * A single key + value attribute. (Only used for presentation.)
  */
-public class Attribute implements Map.Entry<String, String>, Cloneable  {
+public class Attribute implements Map.Entry<String, String>, Cloneable {
     private static final String[] booleanAttributes = {
             "allowfullscreen", "async", "autofocus", "checked", "compact", "declare", "default", "defer", "disabled",
             "formnovalidate", "hidden", "inert", "ismap", "itemscope", "multiple", "muted", "nohref", "noresize",
@@ -26,12 +26,16 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     };
 
     private String key;
-    @Nullable private String val;
-    @Nullable Attributes parent; // used to update the holding Attributes when the key / value is changed via this interface
+    @Nullable
+    private String val;
+    @Nullable
+    Attributes parent; // used to update the holding Attributes when the key / value is changed via
+                       // this interface
 
     /**
      * Create a new attribute from unencoded (raw) key and value.
-     * @param key attribute key; case is preserved.
+     * 
+     * @param key   attribute key; case is preserved.
      * @param value attribute value (may be null)
      * @see #createFromEncoded
      */
@@ -41,10 +45,13 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
 
     /**
      * Create a new attribute from unencoded (raw) key and value.
-     * @param key attribute key; case is preserved.
-     * @param val attribute value (may be null)
-     * @param parent the containing Attributes (this Attribute is not automatically added to said Attributes)
-     * @see #createFromEncoded*/
+     * 
+     * @param key    attribute key; case is preserved.
+     * @param val    attribute value (may be null)
+     * @param parent the containing Attributes (this Attribute is not automatically
+     *               added to said Attributes)
+     * @see #createFromEncoded
+     */
     public Attribute(String key, @Nullable String val, @Nullable Attributes parent) {
         Validate.notNull(key);
         key = key.trim();
@@ -55,8 +62,9 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     /**
-     Get the attribute's key (aka name).
-     @return the attribute key
+     * Get the attribute's key (aka name).
+     * 
+     * @return the attribute key
      */
     @Override
     public String getKey() {
@@ -64,8 +72,9 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     /**
-     Set the attribute key; case is preserved.
-     @param key the new key; must not be null
+     * Set the attribute key; case is preserved.
+     * 
+     * @param key the new key; must not be null
      */
     public void setKey(String key) {
         Validate.notNull(key);
@@ -89,8 +98,9 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     /**
-     Get the attribute value. Will return an empty string if the value is not set.
-     @return the attribute value
+     * Get the attribute value. Will return an empty string if the value is not set.
+     * 
+     * @return the attribute value
      */
     @Override
     public String getValue() {
@@ -99,6 +109,7 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
 
     /**
      * Check if this Attribute has a value. Set boolean attributes have no value.
+     * 
      * @return if this is a boolean attribute / attribute without a value
      */
     public boolean hasDeclaredValue() {
@@ -106,11 +117,14 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     /**
-     Set the attribute value.
-     @param val the new attribute value; may be null (to set an enabled boolean attribute)
-     @return the previous value (if was null; an empty string)
+     * Set the attribute value.
+     * 
+     * @param val the new attribute value; may be null (to set an enabled boolean
+     *            attribute)
+     * @return the previous value (if was null; an empty string)
      */
-    @Override public String setValue(@Nullable String val) {
+    @Override
+    public String setValue(@Nullable String val) {
         String oldVal = this.val;
         if (parent != null) {
             int i = parent.indexOfKey(this.key);
@@ -124,36 +138,48 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     /**
-     Get this attribute's key prefix, if it has one; else the empty string.
-     <p>For example, the attribute {@code og:title} has prefix {@code og}, and local {@code title}.</p>
-
-     @return the tag's prefix
-     @since 1.20.1
+     * Get this attribute's key prefix, if it has one; else the empty string.
+     * <p>
+     * For example, the attribute {@code og:title} has prefix {@code og}, and local
+     * {@code title}.
+     * </p>
+     * 
+     * @return the tag's prefix
+     * @since 1.20.1
      */
     public String prefix() {
         int pos = key.indexOf(':');
-        if (pos == -1) return "";
-        else return key.substring(0, pos);
+        if (pos == -1)
+            return "";
+        else
+            return key.substring(0, pos);
     }
 
     /**
-     Get this attribute's local name. The local name is the name without the prefix (if any).
-     <p>For example, the attribute key {@code og:title} has local name {@code title}.</p>
-
-     @return the tag's local name
-     @since 1.20.1
+     * Get this attribute's local name. The local name is the name without the
+     * prefix (if any).
+     * <p>
+     * For example, the attribute key {@code og:title} has local name {@code title}.
+     * </p>
+     * 
+     * @return the tag's local name
+     * @since 1.20.1
      */
     public String localName() {
         int pos = key.indexOf(':');
-        if (pos == -1) return key;
-        else return key.substring(pos + 1);
+        if (pos == -1)
+            return key;
+        else
+            return key.substring(pos + 1);
     }
 
     /**
-     Get this attribute's namespace URI, if the attribute was prefixed with a defined namespace name. Otherwise, returns
-     the empty string. These will only be defined if using the XML parser.
-     @return the tag's namespace URI, or empty string if not defined
-     @since 1.20.1
+     * Get this attribute's namespace URI, if the attribute was prefixed with a
+     * defined namespace name. Otherwise, returns
+     * the empty string. These will only be defined if using the XML parser.
+     * 
+     * @return the tag's namespace URI, or empty string if not defined
+     * @since 1.20.1
      */
     public String namespace() {
         // set as el.attributes.userData(SharedConstants.XmlnsAttr + prefix, ns)
@@ -166,8 +192,10 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     /**
-     Get the HTML representation of this attribute; e.g. {@code href="index.html"}.
-     @return HTML
+     * Get the HTML representation of this attribute; e.g.
+     * {@code href="index.html"}.
+     * 
+     * @return HTML
      */
     public String html() {
         StringBuilder sb = StringUtil.borrowBuilder();
@@ -176,19 +204,25 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     /**
-     Get the source ranges (start to end positions) in the original input source from which this attribute's <b>name</b>
-     and <b>value</b> were parsed.
-     <p>Position tracking must be enabled prior to parsing the content.</p>
-     @return the ranges for the attribute's name and value, or {@code untracked} if the attribute does not exist or its range
-     was not tracked.
-     @see org.jsoup.parser.Parser#setTrackPosition(boolean)
-     @see Attributes#sourceRange(String)
-     @see Node#sourceRange()
-     @see Element#endSourceRange()
-     @since 1.17.1
+     * Get the source ranges (start to end positions) in the original input source
+     * from which this attribute's <b>name</b>
+     * and <b>value</b> were parsed.
+     * <p>
+     * Position tracking must be enabled prior to parsing the content.
+     * </p>
+     * 
+     * @return the ranges for the attribute's name and value, or {@code untracked}
+     *         if the attribute does not exist or its range
+     *         was not tracked.
+     * @see org.jsoup.parser.Parser#setTrackPosition(boolean)
+     * @see Attributes#sourceRange(String)
+     * @see Node#sourceRange()
+     * @see Element#endSourceRange()
+     * @since 1.17.1
      */
     public Range.AttributeRange sourceRange() {
-        if (parent == null) return Range.AttributeRange.UntrackedAttr;
+        if (parent == null)
+            return Range.AttributeRange.UntrackedAttr;
         return parent.sourceRange(key);
     }
 
@@ -198,7 +232,8 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
 
     static void html(String key, @Nullable String val, QuietAppendable accum, Document.OutputSettings out) {
         key = getValidKey(key, out.syntax());
-        if (key == null) return; // can't write it :(
+        if (key == null)
+            return; // can't write it :(
         htmlNoValidate(key, val, accum, out);
     }
 
@@ -210,12 +245,14 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
 
     /** @deprecated internal method and will be removed in a future version */
     @Deprecated
-    protected static void html(String key, @Nullable String val, Appendable accum, Document.OutputSettings out) throws IOException {
+    protected static void html(String key, @Nullable String val, Appendable accum, Document.OutputSettings out)
+            throws IOException {
         html(key, val, QuietAppendable.wrap(accum), out);
     }
 
     static void htmlNoValidate(String key, @Nullable String val, QuietAppendable accum, Document.OutputSettings out) {
-        // structured like this so that Attributes can check we can write first, so it can add whitespace correctly
+        // structured like this so that Attributes can check we can write first, so it
+        // can add whitespace correctly
         accum.append(key);
         if (!shouldCollapseAttribute(key, val, out)) {
             accum.append("=\"");
@@ -226,18 +263,23 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
 
     private static final Pattern xmlKeyReplace = Pattern.compile("[^-a-zA-Z0-9_:.]+");
     private static final Pattern htmlKeyReplace = Pattern.compile("[\\x00-\\x1f\\x7f-\\x9f \"'/=]+");
+
     /**
-     * Get a valid attribute key for the given syntax. If the key is not valid, it will be coerced into a valid key.
-     * @param key the original attribute key
+     * Get a valid attribute key for the given syntax. If the key is not valid, it
+     * will be coerced into a valid key.
+     * 
+     * @param key    the original attribute key
      * @param syntax HTML or XML
-     * @return the original key if it's valid; a key with invalid characters replaced with "_" otherwise; or null if a valid key could not be created.
+     * @return the original key if it's valid; a key with invalid characters
+     *         replaced with "_" otherwise; or null if a valid key could not be
+     *         created.
      */
-    @Nullable public static String getValidKey(String key, Syntax syntax) {
+    @Nullable
+    public static String getValidKey(String key, Syntax syntax) {
         if (syntax == Syntax.xml && !isValidXmlKey(key)) {
             key = xmlKeyReplace.matcher(key).replaceAll("_");
             return isValidXmlKey(key) ? key : null; // null if could not be coerced
-        }
-        else if (syntax == Syntax.html && !isValidHtmlKey(key)) {
+        } else if (syntax == Syntax.html && !isValidHtmlKey(key)) {
             key = htmlKeyReplace.matcher(key).replaceAll("_");
             return isValidHtmlKey(key) ? key : null; // null if could not be coerced
         }
@@ -245,17 +287,20 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     // perf critical in html() so using manual scan vs regex:
-    // note that we aren't using anything in supplemental space, so OK to iter charAt
-    private static boolean isValidXmlKey(String key) {
+    // note that we aren't using anything in supplemental space, so OK to iter
+    // charAt
+    public static boolean isValidXmlKey(String key) {
         // =~ [a-zA-Z_:][-a-zA-Z0-9_:.]*
         final int length = key.length();
-        if (length == 0) return false;
+        if (length == 0)
+            return false;
         char c = key.charAt(0);
         if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == ':'))
             return false;
         for (int i = 1; i < length; i++) {
             c = key.charAt(i);
-            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == ':' || c == '.'))
+            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_'
+                    || c == ':' || c == '.'))
                 return false;
         }
         return true;
@@ -264,7 +309,8 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     private static boolean isValidHtmlKey(String key) {
         // =~ [\x00-\x1f\x7f-\x9f "'/=]+
         final int length = key.length();
-        if (length == 0) return false;
+        if (length == 0)
+            return false;
         for (int i = 0; i < length; i++) {
             char c = key.charAt(i);
             if ((c <= 0x1f) || (c >= 0x7f && c <= 0x9f) || c == ' ' || c == '"' || c == '\'' || c == '/' || c == '=')
@@ -274,8 +320,10 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     /**
-     Get the string representation of this attribute, implemented as {@link #html()}.
-     @return string
+     * Get the string representation of this attribute, implemented as
+     * {@link #html()}.
+     * 
+     * @return string
      */
     @Override
     public String toString() {
@@ -283,8 +331,11 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
     }
 
     /**
-     * Create a new Attribute from an unencoded key and a HTML attribute encoded value.
-     * @param unencodedKey assumes the key is not encoded, as can be only run of simple \w chars.
+     * Create a new Attribute from an unencoded key and a HTML attribute encoded
+     * value.
+     * 
+     * @param unencodedKey assumes the key is not encoded, as can be only run of
+     *                     simple \w chars.
      * @param encodedValue HTML attribute encoded value
      * @return attribute
      */
@@ -305,7 +356,7 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
      * Collapsible if it's a boolean attribute and value is empty or same as name
      * 
      * @param out output settings
-     * @return  Returns whether collapsible or not
+     * @return Returns whether collapsible or not
      * @deprecated internal method and will be removed in a future version
      */
     @Deprecated
@@ -313,8 +364,10 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
         return shouldCollapseAttribute(key, val, out);
     }
 
-    // collapse unknown foo=null, known checked=null, checked="", checked=checked; write out others
-    protected static boolean shouldCollapseAttribute(final String key, @Nullable final String val, final Document.OutputSettings out) {
+    // collapse unknown foo=null, known checked=null, checked="", checked=checked;
+    // write out others
+    protected static boolean shouldCollapseAttribute(final String key, @Nullable final String val,
+            final Document.OutputSettings out) {
         return (out.syntax() == Syntax.html &&
                 (val == null || (val.isEmpty() || val.equalsIgnoreCase(key)) && Attribute.isBooleanAttribute(key)));
     }
@@ -328,8 +381,10 @@ public class Attribute implements Map.Entry<String, String>, Cloneable  {
 
     @Override
     public boolean equals(@Nullable Object o) { // note parent not considered
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Attribute attribute = (Attribute) o;
         return Objects.equals(key, attribute.key) && Objects.equals(val, attribute.val);
     }
