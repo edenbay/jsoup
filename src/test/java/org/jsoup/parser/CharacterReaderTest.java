@@ -1,15 +1,27 @@
 package org.jsoup.parser;
 
-import org.jsoup.integration.ParseTest;
-import org.jsoup.internal.StringUtil;
-import org.junit.jupiter.api.Test;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
+import java.util.List;
+import java.lang.reflect.Field;
 
-import static org.junit.jupiter.api.Assertions.*;
+
+import org.jsoup.integration.ParseTest;
+import org.jsoup.internal.StringUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for character reader.
@@ -544,5 +556,89 @@ public class CharacterReaderTest {
         assertEquals("He\"llo ", r.consumeAttributeQuoted(true));
         assertEquals('&', r.consume());
     }
+ @Test
+@DisplayName("trackNewlines should not recreate newlinePositions if already initialized")
+void shouldNotRecreateNewlinePositionsIfAlreadyInitialized() throws Exception {
+    String input = "A\nB\nC\nD\n";
+    CharacterReader reader = new CharacterReader(input);
+
+    // First enable - initialize tracking
+    reader.trackNewlines(true);
+    List<Integer> first = getNewlinePositions(reader);
+    assertNotNull(first);
+    int originalSize = first.size();
+    assertTrue(originalSize > 0);
+
+    // Inject impossible data (e.g., -999) to detect reinitialization
+    first.clear();
+    first.add(-999);
+
+    // Second enable - should NOT run the initialization block
+    reader.trackNewlines(true);
+    List<Integer> second = getNewlinePositions(reader);
+
+    // If the mutant ran the block, scanBufferForNewlines() overwrote our -999
+    assertSame(first, second, "List instance should be the same");
+    assertTrue(second.contains(-999), "Marker should remain if not reinitialized");
+    assertEquals(1, second.size(), "List should still contain exactly our injected marker");
+
+    // Disable tracking - should clear the list
+    reader.trackNewlines(false);
+    assertNull(getNewlinePositions(reader), "List should be cleared when disabled");
+
+    // Re-enable - new list (not the same reference)
+    reader.trackNewlines(true);
+    List<Integer> third = getNewlinePositions(reader);
+    assertNotNull(third);
+    assertNotSame(first, third);
+}
+
+// @Test
+@Test
+@DisplayName("lineNumIndex should return correct binary search indexes for all cases")
+void shouldKillAllLineNumIndexMutations() throws Exception {
+    String input = "A\nB\nC\nD\nE";
+    CharacterReader reader = new CharacterReader(input);
+
+    // Case 1: tracking disabled → must return 0
+    int disabled = invokeLineNumIndex(reader, 5);
+    assertEquals(0, disabled, "Should return 0 when tracking is off");
+
+    // Enable tracking and build positions
+    reader.trackNewlines(true);
+    List<Integer> newlines = getNewlinePositions(reader);
+    assertNotNull(newlines);
+    assertTrue(newlines.size() >= 3);
+
+    // Case 2: exact match at known newline
+    int exactMatchPos = newlines.get(1);
+    int resultExact = invokeLineNumIndex(reader, exactMatchPos);
+    assertEquals(1, resultExact, "Exact match should return its index");
+
+    // Case 3: before first newline -> binarySearch = -1
+    int before = newlines.get(0) - 1;
+    int resultBefore = invokeLineNumIndex(reader, before);
+    assertEquals(-1, resultBefore, "Before first newline should return -1");
+
+  int after = input.length() + 100;
+int resultAfter = invokeLineNumIndex(reader, after);
+
+// Expect last valid index (for 4 newlines -> index 3)
+assertEquals(2, resultAfter, 
+    "lineNumIndex should adjust large negative index via Math.abs(i) - 2");
+}
+
+@SuppressWarnings("unchecked")
+private List<Integer> getNewlinePositions(CharacterReader r) throws Exception {
+    Field f = CharacterReader.class.getDeclaredField("newlinePositions");
+    f.setAccessible(true);
+    return (List<Integer>) f.get(r);
+}
+
+private int invokeLineNumIndex(CharacterReader r, int pos) throws Exception {
+    java.lang.reflect.Method m = CharacterReader.class.getDeclaredMethod("lineNumIndex", int.class);
+    m.setAccessible(true);
+    return (Integer) m.invoke(r, pos);
+}
 
 }
