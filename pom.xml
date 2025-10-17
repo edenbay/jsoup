@@ -62,7 +62,62 @@
           </execution>
         </executions>
       </plugin>
+<plugin>
 
+  <groupId>org.pitest</groupId>
+  <artifactId>pitest-maven</artifactId>
+
+
+  <version>1.17.3</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.pitest</groupId>
+      <artifactId>pitest-junit5-plugin</artifactId>
+      <version>1.2.1</version>
+      <exclusions>
+        <!-- Exclude old JUnit Platform versions to prevent conflicts -->
+        <exclusion>
+          <groupId>org.junit.platform</groupId>
+          <artifactId>junit-platform-launcher</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.junit.platform</groupId>
+          <artifactId>junit-platform-engine</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.junit.platform</groupId>
+          <artifactId>junit-platform-commons</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+  <configuration>
+    <excludedTestClasses>
+  <param>org.jsoup.helper.HttpClientExecutorTest</param>
+</excludedTestClasses>
+    <targetClasses>
+      <param>org.jsoup.*</param>                    <!-- All jsoup classes -->
+    </targetClasses>
+    <targetTests>
+      <param>org.jsoup.*</param>                    <!-- All jsoup tests -->
+    </targetTests>
+    <excludedClasses>
+      <param>org.jsoup.examples.*</param>           <!-- Exclude examples -->
+    </excludedClasses>
+    <mutators>
+      <mutator>STRONGER</mutator>                    <!-- Use stronger mutation set -->
+    </mutators>
+    <testPlugin>junit5</testPlugin>
+    <outputFormats>
+      <outputFormat>HTML</outputFormat>              <!-- HTML report -->
+      <outputFormat>XML</outputFormat>               <!-- XML for CI/CD -->
+    </outputFormats>
+    <timestampedReports>false</timestampedReports>  <!-- Consistent report location -->
+    <threads>4</threads>                             <!-- Parallel execution -->
+    <timeoutConstant>4000</timeoutConstant>          <!-- 4 second timeout per test -->
+    <verbose>true</verbose>                          <!-- Enable detailed logging -->
+  </configuration>
+</plugin>
       <!-- Ensure Java 8 and Android 10 API compatibility -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -612,5 +667,6 @@
       <timezone>+11</timezone>
     </developer>
   </developers>
+
 
 </project>

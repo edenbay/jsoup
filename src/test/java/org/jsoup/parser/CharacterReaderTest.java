@@ -1,15 +1,27 @@
 package org.jsoup.parser;
 
-import org.jsoup.integration.ParseTest;
-import org.jsoup.internal.StringUtil;
-import org.junit.jupiter.api.Test;
-
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.io.Writer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.jsoup.integration.ParseTest;
+import org.jsoup.internal.SimpleStreamReader;
+import org.jsoup.internal.StringUtil;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for character reader.
@@ -377,6 +389,19 @@ public class CharacterReaderTest {
         assertEquals('!', r.consume());
         assertTrue(r.isEmpty());
         assertEquals(CharacterReader.EOF, r.consume());
+    }
+  @Test
+    public void doBufferUpBreak(){
+        // 😀 (U+1F600) är ett UTF-16-surrogatpar
+        String emoji = new String(Character.toChars(0x1F600));
+
+        // Lägg emoji precis vid buffergränsen (−1 för att tvinga gränsbyte)
+        String content = "a".repeat(CharacterReader.BufferSize - 1) + emoji + "XYZ";
+
+    
+        assertEquals(content, new CharacterReader(content).consumeToEnd(),
+            "CharacterReader.doBufferUp() ska hantera surrogat på buffertgräns korrekt");
+
     }
 
     @Test public void bufferUp() {
